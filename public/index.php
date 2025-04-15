@@ -82,6 +82,10 @@ register_shutdown_function($shutdownHandler);
 // Add Routing Middleware
 $app->addRoutingMiddleware();
 
+$app->add($container->get(\App\Application\Middleware\LocaleMiddleware::class));
+
+// $app->add($container->get(\App\Application\Middleware\ApiKeyMiddleware::class));
+
 // Add Body Parsing Middleware
 $app->addBodyParsingMiddleware();
 

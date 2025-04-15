@@ -9,6 +9,11 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Loader\JsonFileLoader;
+use App\Application\Middleware\LocaleMiddleware;
+use App\Application\Middleware\ResponseHeaderMiddleware;
+use App\Application\Middleware\ApiKeyMiddleware;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
@@ -36,6 +41,47 @@ return function (ContainerBuilder $containerBuilder) {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             ]);
+        },
+        
+        // Translator::class => function () {
+        //     $translator = new Translator('en');
+        //     $translator->addLoader('json', new JsonFileLoader());
+        //     $translator->addResource('json', __DIR__ . '/../langs/en.json', 'en');
+        //     $translator->addResource('json', __DIR__ . '/../langs/it.json', 'it');
+        //     return $translator;
+        // },
+
+        Translator::class => function () {
+            $translator = new Translator('en');
+            $translator->addLoader('json', new JsonFileLoader());
+            
+            $translator->setFallbackLocales(['en']);
+
+            $loadTranslationsFromDirectory = function ($lang) use ($translator) {
+                $translationFiles = glob(__DIR__ . "/../langs/{$lang}/*.json");
+                foreach ($translationFiles as $file) {
+                    $domain = pathinfo($file, PATHINFO_FILENAME);
+                    $translator->addResource('json', $file, $lang, $domain);
+                }
+            };
+
+            $loadTranslationsFromDirectory('en');
+            $loadTranslationsFromDirectory('it');
+
+            return $translator;
+        },
+
+        LocaleMiddleware::class => function (ContainerInterface $c) {
+            return new LocaleMiddleware($c->get(Translator::class));
+        },
+
+        ResponseHeaderMiddleware::class => function () {
+            return new ResponseHeaderMiddleware();
+        },
+
+        ApiKeyMiddleware::class => function () {
+            $apiKey = $_ENV['API_KEY'] ?? 'default-key';
+            return new ApiKeyMiddleware($apiKey);
         },
     ]);
 };

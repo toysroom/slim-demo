@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
+use Symfony\Component\Translation\Translator;
 
 return function (App $app) {
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
@@ -17,10 +18,19 @@ return function (App $app) {
     });
 
     $app->get('/', function (Request $request, Response $response) {
-        $response->getBody()->write('Hello world!');
-        return $response;
-    });
 
+        $translator = $this->get(Translator::class);
+
+        //$message = $translator->trans('greeting');
+        // $message = $translator->trans('greeting', [], 'messages');
+        // $message = $translator->trans('password_short', [], 'validation');
+        $message = $translator->trans('esempio', [], 'messages');
+
+        $response->getBody()->write($message);
+        return $response;
+    })->add($app->getContainer()->get(\App\Application\Middleware\ApiKeyMiddleware::class));
+
+    
     $app->get('/test', function (Request $request, Response $response) {
         $response->getBody()->write('test!');
         return $response;
@@ -30,6 +40,7 @@ return function (App $app) {
         $group->get('', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
     });
+    //->add($app->getContainer()->get(\App\Application\Middleware\ApiKeyMiddleware::class));
 
 
     $app->group('/customers', function (Group $group) {
