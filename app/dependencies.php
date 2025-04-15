@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\Loader\JsonFileLoader;
+use Symfony\Component\Translation\Formatter\MessageFormatter;
 use App\Application\Middleware\LocaleMiddleware;
 use App\Application\Middleware\ResponseHeaderMiddleware;
 use App\Application\Middleware\ApiKeyMiddleware;
@@ -52,7 +53,7 @@ return function (ContainerBuilder $containerBuilder) {
         // },
 
         Translator::class => function () {
-            $translator = new Translator('en');
+            $translator = new Translator('it', new MessageFormatter());
             $translator->addLoader('json', new JsonFileLoader());
             
             $translator->setFallbackLocales(['en']);

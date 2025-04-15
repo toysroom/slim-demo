@@ -1,4 +1,5 @@
 {
     "greeting": "Ciao, benvenuto su Slim!",
-    "pippo": "sono pippo"
+    "pippo": "sono pippo",
+    "users": "{0} nessun utente|{1} un utente|]1,Inf] ci sono %count% utenti %xx%"
 }

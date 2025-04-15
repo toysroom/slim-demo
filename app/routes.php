@@ -32,7 +32,12 @@ return function (App $app) {
 
     
     $app->get('/test', function (Request $request, Response $response) {
-        $response->getBody()->write('test!');
+
+        $translator = $this->get(Translator::class);
+        
+        $message = $translator->trans('users', ['%count%' => 20, '%xx%' => '!!!'], 'messages');
+
+        $response->getBody()->write($message);
         return $response;
     });
 
